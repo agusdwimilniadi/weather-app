@@ -5,8 +5,6 @@ import { useRef } from "react";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor, AppStore } from "@/lib/redux/store";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export default function ClientProvider({
     children,
@@ -21,15 +19,11 @@ export default function ClientProvider({
         storeRef.current = store;
         persistorRef.current = persistor;
     }
-    const queryClient = new QueryClient()
 
     return (
         <Provider store={storeRef.current}>
             <PersistGate loading={null} persistor={persistorRef.current}>
-                <QueryClientProvider client={queryClient}>
-                    <ReactQueryDevtools initialIsOpen={false} />
-                    {children}
-                </QueryClientProvider>
+                {children}
             </PersistGate>
         </Provider>
     );

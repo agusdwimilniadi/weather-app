@@ -25,12 +25,9 @@ const useDragAndDrop = (data: DataHistory[]) => {
     const handleDrop = (e: React.DragEvent, targetId: number) => {
         e.preventDefault()
         const draggedItemId = e.dataTransfer.getData('draggedItem')
-        console.log({ draggedItemId })
 
         const firstPositionIndex = historyItems.findIndex(item => item.cityCode === parseInt(draggedItemId))
-        console.log({ firstPositionIndex })
         const secondPositionIndex = historyItems.findIndex(item => item.cityCode === targetId)
-        console.log({ secondPositionIndex })
 
         const updatedItems = [...historyItems]
         const [draggedItem] = updatedItems.splice(firstPositionIndex, 1)

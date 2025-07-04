@@ -27,7 +27,6 @@ const recentSearchSlice = createSlice({
                 timestamp: Date.now()
             };
 
-            console.log('Adding search:', newSearchData);
 
             const checkCityIndex = state.searches.findIndex((item) => item.cityCode.toString() === action.payload.cityCode.toString());
 
@@ -38,13 +37,11 @@ const recentSearchSlice = createSlice({
                 state.searches = [newSearchData, ...state.searches];
             }
 
-            console.log('Updated searches:', state.searches);
 
             if (state.searches.length > 10) {
                 state.searches.pop();
             }
 
-            console.log('Final searches:', state.searches);
         },
 
         removeSearch: (state, action: PayloadAction<{ cityCode: number }>) => {

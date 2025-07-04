@@ -13,7 +13,7 @@ const TemperatureChart = () => {
 
     useEffect(() => {
         const transformedData = forecastData.map(item => ({
-            date: item.dt_txt.split(' ')[0],
+            date: item.dt_txt,
             time: item.dt_txt.split(' ')[1].substring(0, 5),
             temp: isCelcius ? item.main.temp : celsiusToFahrenheit(item.main.temp),
         }))
@@ -22,6 +22,7 @@ const TemperatureChart = () => {
     }, [forecastData, isCelcius])
 
     const formatDate = (date: string) => {
+        console.log({ date })
         const options: Intl.DateTimeFormatOptions = {
             day: 'numeric',
             month: 'short',
@@ -48,15 +49,18 @@ const TemperatureChart = () => {
                     <Tooltip
                         formatter={(value: number, name) => {
                             if (name === 'temp') {
-                                return `${value.toFixed(1)}°${isCelcius ? 'C' : 'F'}`; // Convert temperature and show appropriate unit
+                                return `${value.toFixed(1)}°${isCelcius ? 'C' : 'F'}`;
                             }
                             return value;
                         }}
+                        labelFormatter={(label) => formatDate(label)}
                         labelStyle={{ color: 'black' }}
                         itemStyle={{ color: 'black' }}
+                        labelClassName='text-sm'
 
                     />
-                    <Legend />
+                    <Legend wrapperStyle={{ color: 'black' }} formatter={(value) => value === "temp" ? "Temperature" : value}
+                    />
                     <Line type="monotone" dataKey="temp" stroke="white" dot={false} />
                 </LineChart>
             </ResponsiveContainer>
