@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { WeatherData } from "./interface"
+import { ForecastItem, WeatherData } from "./interface"
 
 interface WeatherState {
     currentWeatherData: WeatherData | null
@@ -7,6 +7,7 @@ interface WeatherState {
     error: string | null
     lastFetch: string
     isCelcius: boolean
+    forecastData: ForecastItem[]
 
 }
 
@@ -15,7 +16,8 @@ const initialState: WeatherState = {
     error: null,
     isLoading: false,
     lastFetch: '',
-    isCelcius: true
+    isCelcius: true,
+    forecastData: []
 }
 
 const weatherSlice = createSlice({
@@ -34,6 +36,15 @@ const weatherSlice = createSlice({
                     year: 'numeric'
                 });
         },
+        setForecastData: (state, action: PayloadAction<ForecastItem[]>) => {
+            const filteredData = action.payload.filter(
+                (forecast) => {
+                    const hour = new Date(forecast.dt_txt).getHours();
+                    return hour === 9 || hour === 21;
+                }
+            );
+            state.forecastData = filteredData;
+        },
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.isLoading = action.payload
         },
@@ -50,5 +61,5 @@ const weatherSlice = createSlice({
     }
 })
 
-export const { setWeatherData, setLoading, setError, clearWeatherData, setIsFarenheit } = weatherSlice.actions;
+export const { setWeatherData, setLoading, setError, clearWeatherData, setIsFarenheit, setForecastData } = weatherSlice.actions;
 export default weatherSlice.reducer;

@@ -4,3 +4,18 @@
   --color-primary: #0C1320;
   --color-secondary: #202D3E;
 }
+.custom-scroll::-webkit-scrollbar {
+  width: 6px; /* Thin scrollbar */
+  height: 6px; /* For horizontal scrollbar if needed */
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: #0C1320; /* Dark color for the thumb */
+  border-radius: 8px;
+  border: 2px solid #0C1320; /* Dark border for the thumb for contrast */
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: white; /* Dark background for the track */
+  border-radius: 8px;
+}

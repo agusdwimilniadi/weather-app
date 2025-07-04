@@ -1,46 +1,63 @@
 "use client"
 
 import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/lib/redux/store'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { celsiusToFahrenheit } from '@/utils/celsiusToFarenheit'
 
 const TemperatureChart = () => {
-    const [data, setData] = useState<{ date: string, temp: number }[]>([])
+    const forecastData = useSelector((state: RootState) => state.weather.forecastData)
+    const isCelcius = useSelector((state: RootState) => state.weather.isCelcius)
+    const [data, setData] = useState<{ date: string, temp: number, time: string }[]>([])
 
     useEffect(() => {
-        const rawData = [
-            { dt_txt: "2025-07-04 09:00:00", main: { temp: 28.21 } },
-            { dt_txt: "2025-07-05 09:00:00", main: { temp: 27.33 } },
-            { dt_txt: "2025-07-06 09:00:00", main: { temp: 28.85 } },
-            { dt_txt: "2025-07-07 09:00:00", main: { temp: 30.03 } },
-            { dt_txt: "2025-07-08 09:00:00", main: { temp: 29.73 } },
-            { dt_txt: "2025-07-09 09:00:00", main: { temp: 28.4 } },
-            { dt_txt: "2025-07-04 12:00:00", main: { temp: 29.1 } },
-            { dt_txt: "2025-07-05 12:00:00", main: { temp: 28.0 } },
-            { dt_txt: "2025-07-06 12:00:00", main: { temp: 29.0 } },
-            { dt_txt: "2025-07-07 12:00:00", main: { temp: 30.5 } },
-            { dt_txt: "2025-07-08 12:00:00", main: { temp: 29.6 } },
-            { dt_txt: "2025-07-09 12:00:00", main: { temp: 28.7 } }
-        ]
-
-        const filteredData = rawData.map(item => ({
+        const transformedData = forecastData.map(item => ({
             date: item.dt_txt.split(' ')[0],
-            temp: item.main.temp,
+            time: item.dt_txt.split(' ')[1].substring(0, 5),
+            temp: isCelcius ? item.main.temp : celsiusToFahrenheit(item.main.temp),
         }))
 
-        setData(filteredData)
-    }, [])
+        setData(transformedData)
+    }, [forecastData, isCelcius])
+
+    const formatDate = (date: string) => {
+        const options: Intl.DateTimeFormatOptions = {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+        };
+        return new Intl.DateTimeFormat('id-ID', options).format(new Date(date));
+    };
+
+
 
     return (
         <div className="p-5 bg-secondary rounded-xl">
-            <p className="font-bold uppercase mb-5 text-xl">Temperature (All Times)</p>
+            <p className="font-bold uppercase mb-5">Forecast Temperature (09:00 & 21:00)</p>
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `${value} °C`} />
+                    <XAxis
+                        dataKey="date"
+                        tickFormatter={formatDate}
+                    />
+                    <YAxis domain={['auto', 'auto']} />
+                    <Tooltip
+                        formatter={(value: number, name) => {
+                            if (name === 'temp') {
+                                return `${value.toFixed(1)}°${isCelcius ? 'C' : 'F'}`; // Convert temperature and show appropriate unit
+                            }
+                            return value;
+                        }}
+                        labelStyle={{ color: 'black' }}
+                        itemStyle={{ color: 'black' }}
+
+                    />
                     <Legend />
-                    <Line type="monotone" dataKey="temp" stroke="#8884d8" dot={false} />
+                    <Line type="monotone" dataKey="temp" stroke="white" dot={false} />
                 </LineChart>
             </ResponsiveContainer>
         </div>
