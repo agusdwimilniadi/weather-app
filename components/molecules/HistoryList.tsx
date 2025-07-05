@@ -8,6 +8,7 @@ import { RootState } from '@/lib/redux/store'
 import Button from '../atoms/Button'
 import { MdDelete } from 'react-icons/md'
 import { clearSearches } from '@/lib/redux/slice/searchData/recentSearchSlice'
+import { getByCity } from '@/lib/redux/slice/weatherData/action'
 
 
 const HistoryList = () => {
@@ -27,6 +28,7 @@ const HistoryList = () => {
                         onDragOver={handleDragOver}
                         city={item.city}
                         isDragging={draggingId === item.cityCode}
+                        onClick={() => getByCity(item.city)}
 
                     />
                 )) : (

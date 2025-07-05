@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
@@ -7,19 +7,22 @@ import React, { useEffect, useState } from 'react'
 import Button from '../atoms/Button'
 import { IoRefresh, IoSearch } from 'react-icons/io5'
 import LanguageToggle from '../atoms/ToogleSwitcher'
-import axiosInstance from '@/lib/api/axiosInstance'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { RootState } from '@/lib/redux/store'
-import { setError, setForecastData, setLoading, setWeatherData } from '@/lib/redux/slice/weatherData/currentWeatherSlice'
 import SkeletonBox from '../atoms/SkeletonBox'
 import { celsiusToFahrenheit } from '@/utils/celsiusToFarenheit'
 import Searchbar from '../molecules/Searchbar'
-import { addSearch, setCityRoot } from '@/lib/redux/slice/searchData/recentSearchSlice'
 import { MdOutlineWrongLocation } from 'react-icons/md'
+import { getByCity, getCurrentData } from '@/lib/redux/slice/weatherData/action'
 
 const LoadingApp = () => {
+    const { city } = useSelector((state: RootState) => state.recentSearch);
     return (
         <>
+            <form className='flex items-center gap-3'>
+                <Searchbar readOnly value={city === 'jakarta' ? '' : city} autoComplete='off' name='city' placeholder="Search city name in Indonesia" />
+                <Button className='h-full' type='submit' icon={IoSearch}>Search</Button>
+            </form>
             <div className="flex items-center justify-between mt-5 border border-white/30 rounded-xl p-5">
                 <div className="text-start font-bold">Terakhir Diperbarui: <SkeletonBox className='w-40 h-5' /></div>
                 <div className='flex items-center gap-3'>
@@ -49,57 +52,21 @@ const MainApp = () => {
     const [cityForm, setCityForm] = useState({
         city: '',
     });
-    const dispatch = useDispatch();
     const { isLoading, lastFetch, currentWeatherData, isCelcius, error } = useSelector((state: RootState) => state.weather);
     const { city } = useSelector((state: RootState) => state.recentSearch);
 
-    const getCurrentData = async () => {
-        try {
-            dispatch(setLoading(true))
-            const data = await axiosInstance.get(`weather?q=${city},id&APPID=${process.env.NEXT_PUBLIC_WEATHER_API_KEY}&units=metric`);
-            const dataForecast = await axiosInstance.get(`forecast?q=${city},id&APPID=${process.env.NEXT_PUBLIC_WEATHER_API_KEY}&units=metric`);
-            dispatch(setWeatherData(data.data))
-            dispatch(setForecastData(dataForecast.data.list))
-        } catch (error) {
-            console.log(error)
-        } finally {
-            dispatch(setLoading(false))
-        }
-    }
-
     useEffect(() => {
-        getCurrentData()
+        getCurrentData(city)
     }, [])
 
     if (isLoading) {
         return <LoadingApp />
     }
 
-
-    const getByCity = async () => {
-        try {
-            dispatch(setCityRoot(cityForm.city))
-            dispatch(setLoading(true))
-            const data = await axiosInstance.get(`weather?q=${cityForm.city},id&APPID=${process.env.NEXT_PUBLIC_WEATHER_API_KEY}&units=metric`);
-            const dataForecast = await axiosInstance.get(`forecast?q=${cityForm.city},id&APPID=${process.env.NEXT_PUBLIC_WEATHER_API_KEY}&units=metric`);
-            dispatch(setForecastData(dataForecast.data.list))
-            dispatch(setWeatherData(data.data))
-            dispatch(addSearch({ city: data.data.name, cityCode: data.data.id }))
-            dispatch(setError(null))
-        } catch (error: any) {
-            console.log(error.response.data.message)
-            dispatch(setError(error.response.data.message || 'Something went wrong'))
-            dispatch(setCityRoot('jakarta'))
-        } finally {
-            dispatch(setLoading(false))
-        }
-    }
-
-
     return (
         <>
-            <form onSubmit={(e) => { e.preventDefault(); getByCity() }} className='flex items-center gap-3'>
-                <Searchbar autoComplete='off' value={cityForm.city} onChange={(e) => setCityForm({ ...cityForm, city: e.target.value })} name='city' placeholder="Search city" />
+            <form onSubmit={(e) => { e.preventDefault(); getByCity(cityForm.city) }} className='flex items-center gap-3'>
+                <Searchbar required autoComplete='off' value={cityForm.city} onChange={(e) => setCityForm({ ...cityForm, city: e.target.value })} name='city' placeholder="Search city name in Indonesia" />
                 <Button className='h-full' type='submit' icon={IoSearch}>Search</Button>
             </form>
             {
@@ -114,7 +81,7 @@ const MainApp = () => {
                         <div className="flex items-center justify-between mt-5 border border-white/30 rounded-xl p-5">
                             <div className="text-start font-bold text-sm lg:text-base">Terakhir Diperbarui: <br /> {isLoading ? <SkeletonBox /> : lastFetch}</div>
                             <div className='flex flex-col lg:flex-row items-center gap-3'>
-                                <Button onClick={getCurrentData} isLoading={isLoading} icon={IoRefresh}>
+                                <Button onClick={() => getCurrentData(city)} isLoading={isLoading} icon={IoRefresh}>
                                     Refresh
                                 </Button>
                                 <LanguageToggle />
